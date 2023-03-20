@@ -45,14 +45,19 @@ def build_module(bin_path: Path):
 def main():
     release = False
     strip = False
+    module = True
     if "--release" in sys.argv:
         release = True
         print("Release build enabled.")
     if "--strip" in sys.argv:
         strip = True
         print("Stripping enabled.")
+    if "--no-module" in sys.argv:
+        module = False
+        print("Python module will not be built.")
     bin_path = build_injector(release=release, strip=strip)
-    build_module(bin_path=bin_path)
+    if module:
+        build_module(bin_path=bin_path)
     print("Done.")
 
 
