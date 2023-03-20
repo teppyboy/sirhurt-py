@@ -17,13 +17,25 @@ class RobloxProcess:
         self._pid = pid
         self._file: str = None
 
-    def inject(self, dll: os.PathLike, callback=None):
-        injector_bin = Path(find_spec(__name__).origin).parent.joinpath("bin/injector.exe")
+    def inject(self, dll: os.PathLike, workspace: os.PathLike, callback=None):
+        injector_bin = Path(find_spec(__name__).origin).parent.joinpath(
+            "bin/injector.exe"
+        )
         parent_path = self._file = Path(dll).parent
         # Workaround the initial message box.
-        parent_path.joinpath("SirHurt V4.exe").touch(exist_ok=True)
+        # parent_path.joinpath("org_path.txt").write_text(str(parent_path) + "/")
+        # parent_path.joinpath("SirHurt V4.exe").touch(exist_ok=True)
+        # Workaround Workspace folder
+        parent_path.joinpath("Workspace").symlink_to(workspace, target_is_directory=True)
         self._wine.run(
-            [str(injector_bin), "--pid", str(self._pid), "--dll", f"Z:/{str(dll)}"], prefix=self._prefix
+            [
+                str(injector_bin),
+                "--pid",
+                str(self._wine_pid),
+                "--dll",
+                f"Z:/{str(dll)}",
+            ],
+            prefix=self._prefix,
         ).check_returncode()
         # Assuming sirhurt.dat is next to SirHurt.dll
         self._file = parent_path.joinpath("sirhurt.dat")
@@ -66,9 +78,9 @@ class RobloxProcess:
                 rbx_procs.append(
                     RobloxProcess(
                         pid=proc.pid,
-                        wine_pid=unix_to_wine_pid(proc.pid),
+                        wine_pid=unix_to_wine_pid(proc.pid)["pid"],
                         prefix=env.get("WINEPREFIX", "~/.wine"),
-                        wine=get_wine_from_pid(proc.pid)
+                        wine=get_wine_from_pid(proc.pid),
                     )
                 )
         return rbx_procs
