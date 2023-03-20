@@ -10,6 +10,7 @@ from sirhurt.wine import Wine
 
 class RobloxProcess:
     def __init__(self, pid: int, wine_pid: int, prefix: str, wine: Wine) -> None:
+        self._proc = psutil.Process(pid=pid)
         self._wine_pid = wine_pid
         self._wine = wine
         self._prefix = prefix
@@ -29,7 +30,7 @@ class RobloxProcess:
 
         # Waits for process to exit and do cleanup
         def hook():
-            psutil.Process(self._pid).wait()
+            self._proc.wait()
             self.cleanup()
             if callback:
                 callback()
@@ -48,6 +49,12 @@ class RobloxProcess:
         if self._file:
             self._file.write_text("")
             self._file = None
+
+    def close(self):
+        self._proc.terminate()
+
+    def kill(self):
+        self._proc.kill()
 
     @staticmethod
     def get_roblox_processes() -> list["RobloxProcess"]:
