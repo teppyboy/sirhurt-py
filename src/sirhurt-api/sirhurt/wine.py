@@ -36,24 +36,24 @@ class Wine:
 
     @staticmethod
     def from_grapejuice():
-        cfg_file = Path("~/.config/brinkervii/grapejuice/user_settings.json")
+        cfg_file = Path.home().joinpath(".config/brinkervii/grapejuice/user_settings.json")
         if not cfg_file.is_file():
             raise FileNotFoundError("Grapejuice config file doesn't exist.")
         cfg: dict = json.loads(cfg_file.read_text())
         wine: str = None
-        prefix: Path = Path("~/.local/share/grapejuice/prefixes/player/")
+        prefix: Path = Path.home().joinpath(".local/share/grapejuice/prefixes/player/")
         for pfx in cfg["wineprefixes"]:
             if "player" in pfx["hints"]:
-                wine = pfx["wine_home"] + "/bin/wine"
+                wine = pfx["wine_home"]
         if wine is None:
             try:
-                wine = cfg["default_wine_home"] + "/bin/wine"
+                wine = cfg["default_wine_home"]
             except KeyError:
                 # Grapejuice using system Wine, so use that.
                 return Wine.from_system()
         if not prefix.is_dir():
             prefix.mkdir(parents=True)
-        return Wine(binary=wine, prefix=prefix)
+        return Wine(wine=wine, prefix=prefix)
 
     def _prepare_env(self, prefix: str = None, env: dict = None):
         if not prefix:
