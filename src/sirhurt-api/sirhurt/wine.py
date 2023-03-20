@@ -36,7 +36,9 @@ class Wine:
 
     @staticmethod
     def from_grapejuice():
-        cfg_file = Path.home().joinpath(".config/brinkervii/grapejuice/user_settings.json")
+        cfg_file = Path.home().joinpath(
+            ".config/brinkervii/grapejuice/user_settings.json"
+        )
         if not cfg_file.is_file():
             raise FileNotFoundError("Grapejuice config file doesn't exist.")
         cfg: dict = json.loads(cfg_file.read_text())
@@ -65,24 +67,33 @@ class Wine:
         return _env
 
     def run(
-        self, args: list[str] | str, prefix: str = None, env: dict = None, shell: bool = False
+        self,
+        args: list[str] | str,
+        prefix: str = None,
+        env: dict = None,
+        shell: bool = False,
     ) -> subprocess.CompletedProcess[bytes]:
         if shell:
             args = str(self._binary) + " " + args
         else:
             args = [str(self._binary)] + args
         return subprocess.run(
-            args=args, env=self._prepare_env(prefix=prefix, env=env), capture_output=True, shell=shell
+            args=args,
+            env=self._prepare_env(prefix=prefix, env=env),
+            capture_output=True,
+            shell=shell,
         )
 
     def winedbg(
-        self, args: list[str] | str, prefix: str = None, env: dict = None, shell: bool = False
+        self,
+        args: list[str] | str,
+        prefix: str = None,
+        env: dict = None,
+        shell: bool = False,
     ) -> subprocess.CompletedProcess[bytes]:
         _env = self._prepare_env(prefix=prefix, env=env)
         if shell:
             args = str(self._winedbg) + " " + args
         else:
             args = [str(self._winedbg)] + args
-        return subprocess.run(
-            args=args, env=_env, capture_output=True, shell=shell
-        )
+        return subprocess.run(args=args, env=_env, capture_output=True, shell=shell)

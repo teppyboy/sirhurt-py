@@ -21,10 +21,11 @@ def get_proc_env(pid: int):
             continue
     return proc_env
 
+
 def get_wine_procs_ids(wine: Wine) -> list[dict[str, str | int]]:
-    dbg_out = wine.winedbg('--command "info proc"', env={
-        "WINEDEBUG": "-all"
-    }, shell=True)
+    dbg_out = wine.winedbg(
+        '--command "info proc"', env={"WINEDEBUG": "-all"}, shell=True
+    )
     procs = []
     dbg_out.check_returncode()
     for line in dbg_out.stdout.decode().split("\n"):
@@ -39,12 +40,9 @@ def get_wine_procs_ids(wine: Wine) -> list[dict[str, str | int]]:
             name = props[-1][1:-1]
         except (ValueError, IndexError):
             continue
-        procs.append({
-            "name": name,
-            "pid": pid,
-            "threads": threads
-        })
+        procs.append({"name": name, "pid": pid, "threads": threads})
     return procs
+
 
 def get_wine_from_pid(pid: int) -> Wine | None:
     proc_env = psutil.Process(pid=pid).environ()
@@ -54,15 +52,13 @@ def get_wine_from_pid(pid: int) -> Wine | None:
     wine = Wine(wine=wine_path, prefix=prefix)
     return wine
 
+
 def unix_to_wine_pid(pid: int) -> dict | None:
     proc = psutil.Process(pid=pid)
-    wine = get_wine_from_pid(pid=pid)    
+    wine = get_wine_from_pid(pid=pid)
     wine_procs = get_wine_procs_ids(wine=wine)
     for wine_proc in wine_procs:
         if proc.name() in wine_proc["name"]:
             # Also return the Wine instance because the wine PID is local to that prefix
-            return {
-                "pid": wine_proc["pid"],
-                "wine": wine 
-            }
+            return {"pid": wine_proc["pid"], "wine": wine}
     return
