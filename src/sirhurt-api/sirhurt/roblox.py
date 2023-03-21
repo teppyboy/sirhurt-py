@@ -18,6 +18,8 @@ class RobloxProcess:
         self._file: str = None
 
     def inject(self, dll: os.PathLike, workspace: os.PathLike, callback=None):
+        if self._file is not None:
+            raise FileExistsError("Exploit is already injected.")
         injector_bin = Path(find_spec(__name__).origin).parent.joinpath(
             "bin/injector.exe"
         )
