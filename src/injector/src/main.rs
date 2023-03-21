@@ -1,11 +1,11 @@
 use clap::Parser;
 use dll_syringe::{process::OwnedProcess, Syringe};
 
-/// DLL injector with support for SirHurt API
+/// Another DLL injector
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Process
+    /// Process ID
     #[arg(short, long)]
     pid: u32,
 
