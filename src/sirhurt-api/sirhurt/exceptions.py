@@ -2,5 +2,13 @@ class ExploitError(Exception):
     pass
 
 
-class NotInjectedError(ExploitError):
+class InjectError(ExploitError):
+    pass
+
+
+class NotInjectedError(InjectError):
+    pass
+
+
+class AlreadyInjectedError(InjectError):
     pass

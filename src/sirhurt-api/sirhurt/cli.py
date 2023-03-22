@@ -1,9 +1,13 @@
-import argparse
+import readline  # Enable input() additional features
+from requests import Session
 from pathlib import Path
 from sirhurt import Exploit, RobloxProcess
 
 exploit = Exploit()
 rbx_proc: RobloxProcess = None
+session = Session()
+
+commands = []
 
 
 def find_process():
@@ -85,11 +89,19 @@ def execute_file(file):
     print("Execution success.")
 
 
+def execute_url(url):
+    if not check_alive():
+        return
+    rbx_proc.execute(session.get(url=url).text)
+    print("Execution from Url success.")
+
+
 def loadstring(string):
     if not check_alive():
         return
     rbx_proc.execute(string)
     print("Execution success.")
+
 
 def parse_args(args: list[str]):
     global rbx_proc
@@ -102,32 +114,38 @@ def parse_args(args: list[str]):
                 elif command in ["set"]:
                     rbx_proc = set_process(args[2])
                 elif command in ["check"]:
-                    rbx_proc = (
-                        None if not check_alive(noisy=True) else rbx_proc
-                    )
+                    rbx_proc = None if not check_alive(noisy=True) else rbx_proc
                 elif command in ["close"]:
                     close_proc()
                 else:
                     print("Invalid command:", args[0], args[1])
                 return
-        except Exception:
+            elif args[1].lower() == "file":
+                if command in ["execute", "exec"]:
+                    execute_file(file=args[2])
+                return
+            elif args[1].lower() == "url":
+                if command in ["execute", "exec"]:
+                    execute_url(url=args[2])
+                return
+        except IndexError:
             pass
         if command in ["find-process", "find-proc", "fp"]:
             find_process()
         elif command in ["set-process", "set-proc", "sp"]:
             rbx_proc = set_process(args[1])
         elif command in ["check-process", "check-proc", "cp"]:
-            rbx_proc = (
-                None if not check_alive(noisy=True) else rbx_proc
-            )
+            rbx_proc = None if not check_alive(noisy=True) else rbx_proc
         elif command in ["close-process", "close-roblox", "close"]:
             close_proc()
-        elif command in ["update", "upd8", "ud"]:
+        elif command in ["update", "upd8", "ud", "download", "dl"]:
             update_dll()
         elif command in ["inject", "ij"]:
             inject()
-        elif command in ["execute file", "execfile", "file"]:
+        elif command in ["execute-file", "execfile", "file"]:
             execute_file(file=args[1])
+        elif command in ["execute-url", "execurl", "url"]:
+            execute_url(url=args[1])
         elif command in ["execute", "exec"]:
             loadstring(string=" ".join(args[1:]))
         elif command in ["exit"]:
@@ -139,6 +157,7 @@ def parse_args(args: list[str]):
         print("Error: The command has unfilled args.")
     except Exception as e:
         print("Error:", e)
+
 
 def console():
     print("Welcome to SirHurt API interactive console!")

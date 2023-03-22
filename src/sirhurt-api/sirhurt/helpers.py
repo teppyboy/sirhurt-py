@@ -1,8 +1,10 @@
 from pathlib import Path
+import platform
 
 import psutil
 
 from sirhurt.wine import Wine
+from sirhurt.windows import Windows
 
 
 def get_proc_env(pid: int):
@@ -23,10 +25,18 @@ def get_proc_env(pid: int):
 
 
 def get_wine_procs_ids(wine: Wine) -> list[dict[str, str | int]]:
+    procs = []
+    if platform.system() == "Windows":
+        for proc in psutil.process_iter(attrs=["name", "pid", "threads"]):
+            procs.append({
+                "name": proc.name(),
+                "pid": proc.pid,
+                "threads": len(proc.threads())
+            })
+        return procs
     dbg_out = wine.winedbg(
         '--command "info proc"', env={"WINEDEBUG": "-all"}, shell=True
     )
-    procs = []
     dbg_out.check_returncode()
     for line in dbg_out.stdout.decode().split("\n"):
         props = line.split(" ")
@@ -45,6 +55,8 @@ def get_wine_procs_ids(wine: Wine) -> list[dict[str, str | int]]:
 
 
 def get_wine_from_pid(pid: int) -> Wine | None:
+    if platform.system() == "Windows":
+        return Windows()
     proc_env = psutil.Process(pid=pid).environ()
     prefix = proc_env["WINEPREFIX"] or "~/.wine"
     # .../<wine>/bin/wine and we need the <wine> path
@@ -55,6 +67,8 @@ def get_wine_from_pid(pid: int) -> Wine | None:
 
 def unix_to_wine_pid(pid: int) -> dict | None:
     proc = psutil.Process(pid=pid)
+    if platform.system() == "Windows":
+        return proc.pid
     wine = get_wine_from_pid(pid=pid)
     wine_procs = get_wine_procs_ids(wine=wine)
     for wine_proc in wine_procs:

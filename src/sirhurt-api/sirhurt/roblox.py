@@ -18,8 +18,6 @@ class RobloxProcess:
         self._file: str = None
 
     def inject(self, dll: os.PathLike, workspace: os.PathLike, callback=None):
-        if self._file is not None:
-            raise FileExistsError("Exploit is already injected.")
         injector_bin = Path(find_spec(__name__).origin).parent.joinpath(
             "bin/injector.exe"
         )
@@ -28,7 +26,9 @@ class RobloxProcess:
         # parent_path.joinpath("org_path.txt").write_text(str(parent_path) + "/")
         # parent_path.joinpath("SirHurt V4.exe").touch(exist_ok=True)
         # Workaround Workspace folder
-        parent_path.joinpath("Workspace").symlink_to(workspace, target_is_directory=True)
+        parent_path.joinpath("Workspace").symlink_to(
+            workspace, target_is_directory=True
+        )
         self._wine.run(
             [
                 str(injector_bin),
@@ -45,7 +45,6 @@ class RobloxProcess:
         # Waits for process to exit and do cleanup
         def hook():
             self._proc.wait()
-            self.cleanup()
             if callback:
                 callback()
 
@@ -58,11 +57,6 @@ class RobloxProcess:
         if self._file is None:
             raise NotInjectedError("Exploit is not injected.")
         self._file.write_text(script)
-
-    def cleanup(self):
-        if self._file:
-            self._file.write_text("")
-            self._file = None
 
     def close(self):
         self._proc.terminate()
