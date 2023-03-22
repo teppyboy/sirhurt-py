@@ -1,8 +1,8 @@
 import os
 import platform
 import subprocess
-from pathlib import Path
-from sirhurt.constants import APP_PATHS
+# from pathlib import Path
+# from sirhurt.constants import APP_PATHS
 from sirhurt.wine import Wine
 
 

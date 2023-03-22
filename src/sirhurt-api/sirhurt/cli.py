@@ -1,4 +1,7 @@
 import readline  # Enable input() additional features
+import tkinter as tk
+import tkinter.messagebox as msgbox
+from threading import Thread
 from requests import Session
 from pathlib import Path
 from sirhurt import Exploit, RobloxProcess
@@ -96,6 +99,21 @@ def execute_url(url):
     print("Execution from Url success.")
 
 
+def execute_gui():
+    window = tk.Tk()
+    script_box = tk.Text()
+    script_box.pack()
+    def _exec(*args, **kwargs):
+        if rbx_proc is None or not rbx_proc.is_process_alive():
+            msgbox.showerror(title="Error", message="Not injected.")
+            return
+        script = script_box.get("1.0", tk.END)
+        rbx_proc.execute(script)
+    exec_btn = tk.Button(text="Execute", command=_exec)
+    exec_btn.pack()
+    window.mainloop()
+
+
 def loadstring(string):
     if not check_alive():
         return
@@ -146,6 +164,8 @@ def parse_args(args: list[str]):
             execute_file(file=args[1])
         elif command in ["execute-url", "execurl", "url"]:
             execute_url(url=args[1])
+        elif command in ["execute-gui", "execgui", "gui"]:
+            Thread(target=execute_gui, daemon=True).run()
         elif command in ["execute", "exec"]:
             loadstring(string=" ".join(args[1:]))
         elif command in ["exit"]:
