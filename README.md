@@ -19,6 +19,7 @@ sirhurt-py is a fairly new project, but it can cover most use cases:
 ### From source
 
 > **Warning**
+
 > For the DLL injector to compile, you must have Rust *nightly*, if you don't and you're using `rustup` then to install the nightly toolchain:
 >
 > ```bash
@@ -27,6 +28,7 @@ sirhurt-py is a fairly new project, but it can cover most use cases:
 
 Assuming you have [`poetry`](https://python-poetry.org/) installed:
 > **Warning**
+
 > Building injector requires `cargo` to be installed.
 
 ```bash
