@@ -80,3 +80,17 @@ class RobloxProcess:
                     )
                 )
         return rbx_procs
+
+    @staticmethod
+    def get_roblox_process() -> "RobloxProcess" | None:
+        for proc in psutil.process_iter(["pid", "name"]):
+            # Sometimes the process miss the last character and the extension
+            if "RobloxPlayerBet" in proc.name():
+                env = proc.environ()
+                return RobloxProcess(
+                    pid=proc.pid,
+                    wine_pid=unix_to_wine_pid(proc.pid)["pid"],
+                    prefix=env.get("WINEPREFIX", "~/.wine"),
+                    wine=get_wine_from_pid(proc.pid),
+                )
+                
