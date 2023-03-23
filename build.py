@@ -35,10 +35,11 @@ def build_injector(release: bool = False, strip: bool = False):
     return bin_path
 
 
-def build_module(bin_path: Path):
-    module_path = Path("./src/sirhurt-api")
-    print("Copying injector binary to module...")
-    copy2(bin_path, module_path.joinpath("sirhurt/bin/injector.exe"))
+def build_module(bin_path: Path | None):
+    if bin_path:
+        module_path = Path("./src/sirhurt-api")
+        print("Copying injector binary to module...")
+        copy2(bin_path, module_path.joinpath("sirhurt/bin/injector.exe"))
     print("Building module...")
     run("poetry build", cwd=module_path)
 
@@ -46,6 +47,7 @@ def main():
     release = False
     strip = False
     module = True
+    injector = True
     if "--release" in sys.argv:
         release = True
         print("Release build enabled.")
@@ -55,7 +57,12 @@ def main():
     if "--no-module" in sys.argv:
         module = False
         print("Python module will not be built.")
-    bin_path = build_injector(release=release, strip=strip)
+    if "--no-injector" in sys.argv:
+        injector = False
+        print("Rust injector will not be built.")
+    bin_path = None
+    if injector:
+        bin_path = build_injector(release=release, strip=strip)
     if module:
         build_module(bin_path=bin_path)
     print("Done.")
