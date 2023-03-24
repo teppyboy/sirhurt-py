@@ -28,11 +28,9 @@ def get_wine_procs_ids(wine: Wine) -> list[dict[str, str | int]]:
     procs = []
     if platform.system() == "Windows":
         for proc in psutil.process_iter(attrs=["name", "pid", "threads"]):
-            procs.append({
-                "name": proc.name(),
-                "pid": proc.pid,
-                "threads": len(proc.threads())
-            })
+            procs.append(
+                {"name": proc.name(), "pid": proc.pid, "threads": len(proc.threads())}
+            )
         return procs
     dbg_out = wine.winedbg(
         '--command "info proc"', env={"WINEDEBUG": "-all"}, shell=True

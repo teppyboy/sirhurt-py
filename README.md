@@ -48,13 +48,13 @@ poetry shell
 Here's a simple Python code that find Roblox processes, inject SirHurt and execute `print("Hello world!")`
 
 ```py
-from sirhurt import RobloxProcess, Exploit
+from sirhurt import RobloxProcess, Exploit, InjectedClient
 
-exploit = Exploit()
+exploit: Exploit = Exploit()
 exploit.download_dll()
-roblox = RobloxProcess.get_roblox_process()
-exploit.inject(roblox=roblox)
-roblox.execute('print("Hello world!")')
+roblox: RobloxProcess = RobloxProcess.get_roblox_process()
+client: InjectedClient = exploit.inject(roblox=roblox)
+client.execute('print("Hello world!")')
 ```
 
 ## FAQ

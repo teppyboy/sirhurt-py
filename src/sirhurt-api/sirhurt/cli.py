@@ -4,10 +4,11 @@ import tkinter.messagebox as msgbox
 from threading import Thread
 from requests import Session
 from pathlib import Path
-from sirhurt import Exploit, RobloxProcess
+from sirhurt import Exploit, RobloxProcess, InjectedClient
 
 exploit = Exploit()
 rbx_proc: RobloxProcess = None
+client: InjectedClient = None
 session = Session()
 
 commands = []
@@ -45,9 +46,11 @@ def set_process(index):
 
 def check_alive(noisy=False):
     global rbx_proc
+    global client
     if rbx_proc is None or not rbx_proc.is_process_alive():
         print("Current Roblox process is dead.")
         rbx_proc = None
+        client = None
         return False
     if noisy:
         print("Current Roblox process is alive.")
@@ -64,10 +67,11 @@ def close_proc():
 
 
 def inject():
+    global client
     if not check_alive():
         return
     print("Injecting...")
-    exploit.inject(roblox=rbx_proc)
+    client = exploit.inject(roblox=rbx_proc)
     print("Sucessfully injected.")
 
 
@@ -88,14 +92,14 @@ def execute_file(file):
     if not fp.is_file():
         print(f"{file} doesn't exist/is not a file.")
         return
-    rbx_proc.execute(fp.read_text())
+    client.execute(fp.read_text())
     print("Execution success.")
 
 
 def execute_url(url):
     if not check_alive():
         return
-    rbx_proc.execute(session.get(url=url).text)
+    client.execute(session.get(url=url).text)
     print("Execution from Url success.")
 
 
@@ -103,12 +107,14 @@ def execute_gui():
     window = tk.Tk()
     script_box = tk.Text()
     script_box.pack()
+
     def _exec(*args, **kwargs):
         if rbx_proc is None or not rbx_proc.is_process_alive():
             msgbox.showerror(title="Error", message="Not injected.")
             return
         script = script_box.get("1.0", tk.END)
-        rbx_proc.execute(script)
+        client.execute(script)
+
     exec_btn = tk.Button(text="Execute", command=_exec)
     exec_btn.pack()
     window.mainloop()
@@ -117,12 +123,13 @@ def execute_gui():
 def loadstring(string):
     if not check_alive():
         return
-    rbx_proc.execute(string)
+    client.execute(string)
     print("Execution success.")
 
 
 def parse_args(args: list[str]):
     global rbx_proc
+    global client
     try:
         command = args[0].lower()
         try:
@@ -132,7 +139,9 @@ def parse_args(args: list[str]):
                 elif command in ["set"]:
                     rbx_proc = set_process(args[2])
                 elif command in ["check"]:
-                    rbx_proc = None if not check_alive(noisy=True) else rbx_proc
+                    rbx_proc = client = (
+                        None if not check_alive(noisy=True) else rbx_proc
+                    )
                 elif command in ["close"]:
                     close_proc()
                 else:
@@ -153,7 +162,7 @@ def parse_args(args: list[str]):
         elif command in ["set-process", "set-proc", "sp"]:
             rbx_proc = set_process(args[1])
         elif command in ["check-process", "check-proc", "cp"]:
-            rbx_proc = None if not check_alive(noisy=True) else rbx_proc
+            rbx_proc = client = None if not check_alive(noisy=True) else rbx_proc
         elif command in ["close-process", "close-roblox", "close"]:
             close_proc()
         elif command in ["update", "upd8", "ud", "download", "dl"]:
